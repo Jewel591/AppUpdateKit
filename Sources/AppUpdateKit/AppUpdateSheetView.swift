@@ -24,7 +24,11 @@ public struct AppUpdateSheetView: View {
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    AppUpdateSheetIcon(appName: update.appName, size: 100)
+                    AppUpdateSheetIcon(
+                        appName: update.appName,
+                        iconURL: update.iconURL,
+                        size: 100
+                    )
                         .padding(.top)
                         .padding(.bottom)
 
@@ -87,27 +91,33 @@ private struct AppUpdateSheetCloseBar: View {
 
 private struct AppUpdateSheetIcon: View {
     let appName: String
+    let iconURL: URL?
     let size: CGFloat
 
     var body: some View {
         Group {
-            if let icon = HostAppIcon.image {
-                icon
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: size, height: size)
-                    .clipShape(RoundedRectangle(cornerRadius: size * 0.20, style: .continuous))
+            if let iconURL {
+                AsyncImage(url: iconURL) { image in
+                    image.resizable().scaledToFit()
+                } placeholder: {
+                    fallback
+                }
+            } else if let icon = HostAppIcon.image {
+                icon.resizable().scaledToFit()
             } else {
-                Text(String(appName.prefix(1)).uppercased())
-                    .font(.largeTitle.weight(.bold))
-                    .foregroundStyle(.primary)
-                    .frame(width: size, height: size)
-                    .background(
-                        .quaternary,
-                        in: RoundedRectangle(cornerRadius: size * 0.20, style: .continuous)
-                    )
+                fallback
             }
         }
+        .frame(width: size, height: size)
+        .clipShape(RoundedRectangle(cornerRadius: size * 0.20, style: .continuous))
+    }
+
+    private var fallback: some View {
+        Text(String(appName.prefix(1)).uppercased())
+            .font(.largeTitle.weight(.bold))
+            .foregroundStyle(.primary)
+            .frame(width: size, height: size)
+            .background(.quaternary)
     }
 }
 

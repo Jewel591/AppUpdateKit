@@ -9,6 +9,7 @@ public struct AppUpdatePresentation: Equatable, Identifiable, Sendable {
     public let latestVersion: String
     public let releaseNotes: String?
     public let releaseDate: Date?
+    public let iconURL: URL?
     public let storeURL: URL
 
     public var id: String { "\(latestVersion)|\(storeURL.absoluteString)" }
@@ -19,6 +20,7 @@ public struct AppUpdatePresentation: Equatable, Identifiable, Sendable {
         latestVersion: String,
         releaseNotes: String? = nil,
         releaseDate: Date? = nil,
+        iconURL: URL? = nil,
         storeURL: URL
     ) {
         self.appName = appName
@@ -26,6 +28,7 @@ public struct AppUpdatePresentation: Equatable, Identifiable, Sendable {
         self.latestVersion = latestVersion
         self.releaseNotes = releaseNotes
         self.releaseDate = releaseDate
+        self.iconURL = iconURL
         self.storeURL = storeURL
     }
 }
@@ -212,6 +215,7 @@ public final class AppUpdateController {
                 latestVersion: release.version,
                 releaseNotes: release.releaseNotes,
                 releaseDate: release.releaseDate,
+                iconURL: release.iconURL,
                 storeURL: release.storeURL
             )
             return .updateAvailable
