@@ -27,6 +27,7 @@ struct ITunesLookupParsingTests {
         #expect(release?.releaseNotes?.contains("Bug fixes") == true)
         #expect(release?.releaseDate != nil)
         #expect(release?.storeURL.absoluteString == "https://apps.apple.com/cn/app/id6670716062")
+        #expect(release?.iconURL?.absoluteString == "https://example.com/icon.png")
     }
 
     @Test func emptyResultsParseAsNoListing() throws {
@@ -50,5 +51,6 @@ struct ITunesLookupParsingTests {
         #expect(release?.version == "1.0.1")
         #expect(release?.releaseNotes == nil)
         #expect(release?.releaseDate == nil)
+        #expect(release?.iconURL == nil)
     }
 }

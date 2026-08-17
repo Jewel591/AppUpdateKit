@@ -7,6 +7,7 @@ public struct AppStoreRelease: Equatable, Sendable {
     public let version: String
     public let releaseNotes: String?
     public let releaseDate: Date?
+    public let iconURL: URL?
     public let storeURL: URL
 
     public init(
@@ -14,12 +15,14 @@ public struct AppStoreRelease: Equatable, Sendable {
         version: String,
         releaseNotes: String?,
         releaseDate: Date?,
+        iconURL: URL? = nil,
         storeURL: URL
     ) {
         self.appName = appName
         self.version = version
         self.releaseNotes = releaseNotes
         self.releaseDate = releaseDate
+        self.iconURL = iconURL
         self.storeURL = storeURL
     }
 }
@@ -89,6 +92,8 @@ public struct ITunesLookupClient: AppStoreLookupClient {
             releaseDate: result.currentVersionReleaseDate.flatMap {
                 ISO8601DateFormatter().date(from: $0)
             },
+            iconURL: (result.artworkUrl512 ?? result.artworkUrl100)
+                .flatMap(URL.init(string:)),
             storeURL: storeURL
         )
     }
@@ -103,5 +108,7 @@ public struct ITunesLookupClient: AppStoreLookupClient {
         let releaseNotes: String?
         let currentVersionReleaseDate: String?
         let trackViewUrl: String
+        let artworkUrl512: String?
+        let artworkUrl100: String?
     }
 }

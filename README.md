@@ -66,10 +66,13 @@ if let update = AppUpdate.controller.availableUpdate {
 }
 ```
 
-`AppUpdateSheetView` offers Update Now / Later / Skip This Version and is
-localized (en source + de, es, fr, ja, ko, pt-BR, zh-Hans, zh-Hant). Hosts
-with a bespoke design can render `availableUpdate` themselves and call
-`remindLater()` / `ignoreThisVersion()` directly.
+`AppUpdateSheetView` is the house announcement prompt: app icon, “New
+Version”, Update Now / Remind Me Later, and the store release notes with
+line breaks preserved. It is localized (en source + de, es, fr, ja, ko,
+pt-BR, zh-Hans, zh-Hant). `ignoreThisVersion()` stays on the controller
+for hosts that want a skip action; the default sheet does not show it.
+Hosts with a bespoke design can render `availableUpdate` themselves and
+call `remindLater()` / `ignoreThisVersion()` directly.
 
 A settings-page "Check for Updates" action uses `force: true`, which bypasses
 both the throttle and the skip/remind suppression. The returned
