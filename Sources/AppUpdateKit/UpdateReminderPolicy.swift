@@ -39,5 +39,10 @@ enum UpdateReminderPolicy {
 
     static func recordRemindLater(defaults: UserDefaults, now: Date) {
         defaults.set(now.addingTimeInterval(remindLaterInterval), forKey: nextRemindDateKey)
+        // The user's latest choice wins: choosing "Later" on a version they
+        // previously skipped (reachable via a forced check) means they want
+        // to be reminded again — a lingering skip record would suppress that
+        // version forever.
+        defaults.removeObject(forKey: ignoredVersionKey)
     }
 }

@@ -63,7 +63,10 @@ public struct ITunesLookupClient: AppStoreLookupClient {
             throw LookupError.invalidResponse
         }
 
-        let (data, response) = try await session.data(from: url)
+        // A per-request timeout well under the controller's total deadline;
+        // the lookup is a launch-time side capability and must fail fast.
+        let request = URLRequest(url: url, timeoutInterval: 15)
+        let (data, response) = try await session.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse,
               (200..<300).contains(httpResponse.statusCode)
         else {

@@ -32,8 +32,10 @@ Explicitly out of scope:
 - **Numeric version comparison.** Every comparison goes through `AppVersion`
   (component-wise numeric), never string ordering.
 - **Never blocks launch.** Network failure, missing listing, or decode errors
-  are logged and swallowed; `hasCompletedCheckThisLaunch` still flips so
-  startup surface chains never wait on a prompt that will not come.
+  are logged and reported only through the returned outcome; the whole lookup
+  runs under a kit-controlled deadline (20 s total, 15 s per request), so
+  `hasCompletedCheckThisLaunch` always flips within a bound the kit controls
+  and startup surface chains never wait on a prompt that will not come.
 
 ## Usage
 
@@ -70,11 +72,22 @@ with a bespoke design can render `availableUpdate` themselves and call
 `remindLater()` / `ignoreThisVersion()` directly.
 
 A settings-page "Check for Updates" action uses `force: true`, which bypasses
-both the throttle and the skip/remind suppression:
+both the throttle and the skip/remind suppression. The returned
+`AppUpdateCheckOutcome` lets you give the user honest feedback (launch-time
+callers just discard it):
 
 ```swift
-await AppUpdate.controller.checkForAppUpdate(force: true)
+switch await AppUpdate.controller.checkForAppUpdate(force: true) {
+case .updateAvailable: break  // availableUpdate is published; present it
+case .upToDate:        showMessage("You're on the latest version.")
+case .notListed, .failed, .suppressed, .throttled:
+    showMessage("Couldn't check for updates. Try again later.")
+}
 ```
+
+Concurrent calls coalesce onto the in-flight check; a forced call that lands
+while an automatic check is running waits for it and then runs its own forced
+pass, so the user's explicit request is never silently dropped.
 
 Startup surface chains (What's New, promotions) that must not race the update
 prompt can wait on `hasCompletedCheckThisLaunch`.
