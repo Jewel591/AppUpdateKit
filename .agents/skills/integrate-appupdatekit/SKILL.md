@@ -1,11 +1,11 @@
 ---
-name: app-update-kit
+name: integrate-appupdatekit
 description: 在任何 Apple App 里实现、迁移或排查「检查 App Store 新版本 / 更新提醒弹窗」能力时必须先加载：一律接 AppUpdateKit（Jewel591/AppUpdateKit），⛔ 不再手写 AppUpdateViewModel / iTunes Lookup 调用 / 版本比较。覆盖标准接入姿势、CI lint（app-update-check-lint v6）的四项装配证据、迁移时的删除清单与 UserDefaults key 兼容事实。本 skill 是接入索引，范围裁决正文在本仓库 CLAUDE.md。
 ---
 
 # AppUpdateKit 接入 skill
 
-（本文件是 skill 正身；各机器 `~/.agents/skills/app-update-kit/` 只放指向这里的壳。）
+（本文件是 skill 正身；各机器 `~/.agents/skills/integrate-appupdatekit/` 只放指向这里的壳。）
 
 全线 Apple App 的更新检查唯一正身是 **[Jewel591/AppUpdateKit](https://github.com/Jewel591/AppUpdateKit)**
 （本地 checkout：`~/Documents/DevProjects/Swift Projects/AppUpdateKit`）。
