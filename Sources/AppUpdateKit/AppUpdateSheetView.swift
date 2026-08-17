@@ -192,20 +192,55 @@ private enum HostAppIcon {
 
     #if canImport(UIKit)
     private static var uiImage: UIImage? {
+        for name in iconResourceNames() {
+            if let image = UIImage(named: name) ?? imageFromBundleFile(name) {
+                return image
+            }
+        }
+        return firstAppIconFileInBundle()
+    }
+
+    private static func iconResourceNames() -> [String] {
+        var names = ["AppIcon"]
         guard
             let icons = Bundle.main.infoDictionary?["CFBundleIcons"] as? [String: Any],
             let primary = icons["CFBundlePrimaryIcon"] as? [String: Any]
-        else { return nil }
-
-        if let name = primary["CFBundleIconName"] as? String,
-           let image = UIImage(named: name) {
-            return image
+        else { return names }
+        if let name = primary["CFBundleIconName"] as? String {
+            names.append(name)
         }
         if let files = primary["CFBundleIconFiles"] as? [String] {
-            for name in files.reversed() {
-                if let image = UIImage(named: name) {
-                    return image
-                }
+            names.append(contentsOf: files.reversed())
+        }
+        return names
+    }
+
+    private static func imageFromBundleFile(_ name: String) -> UIImage? {
+        let bundle = Bundle.main
+        let base = name.hasSuffix(".png") ? String(name.dropLast(4)) : name
+        if let path = bundle.path(forResource: name, ofType: nil),
+           let image = UIImage(contentsOfFile: path) {
+            return image
+        }
+        if let path = bundle.path(forResource: base, ofType: "png"),
+           let image = UIImage(contentsOfFile: path) {
+            return image
+        }
+        let direct = (bundle.bundlePath as NSString).appendingPathComponent(name)
+        return UIImage(contentsOfFile: direct)
+            ?? UIImage(contentsOfFile: direct + ".png")
+    }
+
+    private static func firstAppIconFileInBundle() -> UIImage? {
+        guard let urls = Bundle.main.urls(forResourcesWithExtension: "png", subdirectory: nil) else {
+            return nil
+        }
+        let matches = urls
+            .filter { $0.lastPathComponent.localizedCaseInsensitiveContains("AppIcon") }
+            .sorted { $0.lastPathComponent.count > $1.lastPathComponent.count }
+        for url in matches {
+            if let image = UIImage(contentsOfFile: url.path) {
+                return image
             }
         }
         return nil
