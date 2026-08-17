@@ -12,6 +12,22 @@ public struct AppUpdatePresentation: Equatable, Identifiable, Sendable {
     public let storeURL: URL
 
     public var id: String { "\(latestVersion)|\(storeURL.absoluteString)" }
+
+    public init(
+        appName: String,
+        currentVersion: String,
+        latestVersion: String,
+        releaseNotes: String? = nil,
+        releaseDate: Date? = nil,
+        storeURL: URL
+    ) {
+        self.appName = appName
+        self.currentVersion = currentVersion
+        self.latestVersion = latestVersion
+        self.releaseNotes = releaseNotes
+        self.releaseDate = releaseDate
+        self.storeURL = storeURL
+    }
 }
 
 /// What a single `checkForAppUpdate` call concluded. Launch-time callers can
