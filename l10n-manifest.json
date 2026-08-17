@@ -1,0 +1,10 @@
+{
+  "catalogs": [
+    {
+      "path": "Sources/AppUpdateKit/Resources/Localizable.xcstrings",
+      "target": "AppUpdateKit",
+      "sourceRoot": "Sources/AppUpdateKit",
+      "platforms": ["iOS", "macOS"]
+    }
+  ]
+}
