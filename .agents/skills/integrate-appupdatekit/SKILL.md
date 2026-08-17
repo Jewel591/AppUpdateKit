@@ -30,7 +30,12 @@ description: 在任何 Apple App 里实现、迁移或排查「检查 App Store 
    ⛔ 不保留两套并行检查。用户已有的「跳过此版本 / 稍后提醒」选择自动保留——
    kit 写死了旧 key（`IgnoredAppVersion` / `NextUpdateRemindDate`），零迁移代码。
 4. 更新弹窗是 App 发起的 surface：经宿主 SheetCoordinator / SurfaceCoordinatorKit
-   仲裁展示 `availableUpdate`；启动弹层链用 `hasCompletedCheckThisLaunch` 防竞态。
+   仲裁展示 `availableUpdate`。`hasCompletedCheckThisLaunch` 只用来挡住**更低
+   优先级**的 surface 在 lookup 尚未结束时抢跑。⛔ 不要让本地已经就绪的
+   What's New（或任何同级/更高候选）先 `await checkForAppUpdate()`——lookup
+   窗口里用户一点进详情，整轮被根守卫丢掉，而这次检查又是进程内只跑一次，
+   后面补不回来。本地已有 What's New 就先仲裁；更新检查可以后台跑，关掉
+   What's New 后再收一轮。
 5. 设置页「检查更新」按钮用 `checkForAppUpdate(force: true)`（绕过节流与抑制）。
 6. 零配置是不变式：⛔ 不给 kit 加 App Store ID / storefront / 阈值参数；
    要改策略就在 kit 内全线一起改（见 kit CLAUDE.md 不变式 1–2）。

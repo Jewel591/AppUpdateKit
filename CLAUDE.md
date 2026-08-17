@@ -17,7 +17,8 @@
    或字典序比较进入本仓库。
 5. **更新检查是启动期旁路能力**：任何失败只记日志，不 throw、不弹残缺 UI、
    不阻塞启动。`hasCompletedCheckThisLaunch` 在所有出口都必须置位（含失败与节流），
-   宿主的启动弹层链依赖它判断「更新弹窗不会再迟到」。
+   好让宿主挡住「lookup 还没结束时更低优先级 surface 抢跑」。
+   ⛔ 它不是「任何启动弹层都先等 lookup」的许可证——本地已就绪的候选必须先走仲裁。
 6. **kit 不做展示仲裁**：只发布 `availableUpdate` 状态；由宿主的
    SheetCoordinator / SurfaceCoordinatorKit 决定何时展示。
 7. **强制更新 / 最低版本闸门有意不做**（本产品线无此需求；要做也是独立能力，

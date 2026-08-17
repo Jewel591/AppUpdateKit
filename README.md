@@ -92,8 +92,13 @@ Concurrent calls coalesce onto the in-flight check; a forced call that lands
 while an automatic check is running waits for it and then runs its own forced
 pass, so the user's explicit request is never silently dropped.
 
-Startup surface chains (What's New, promotions) that must not race the update
-prompt can wait on `hasCompletedCheckThisLaunch`.
+`hasCompletedCheckThisLaunch` lets a *lower-priority* candidate wait so it
+cannot sneak in while an update prompt might still arrive. It is not a license
+to stall every launch surface on this lookup. If What's New (or any other
+local candidate) is already ready, present it now; start the check in the
+background and re-arbitrate after dismiss. Awaiting the lookup to "keep update
+first" loses the whole round when the user navigates during the wait, and a
+process-once check cannot retry.
 
 ## Requirements
 
