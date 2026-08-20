@@ -39,3 +39,10 @@ description: 在任何 Apple App 里实现、迁移或排查「检查 App Store 
 5. 设置页「检查更新」按钮用 `checkForAppUpdate(force: true)`（绕过节流与抑制）。
 6. 零配置是不变式：⛔ 不给 kit 加 App Store ID / storefront / 阈值参数；
    要改策略就在 kit 内全线一起改（见 kit CLAUDE.md 不变式 1–2）。
+
+## 宿主测试边界
+
+- 宿主只测试自己的事实：真实旧 key 是否原样保留、更新候选如何映射到本项目的 surface 仲裁，以及设置页手动检查入口是否接到强制检查语义。
+- lookup、版本比较、节流、忽略版本、稍后提醒与 controller 状态机属于 AppUpdateKit；不要在每个 App 复刻这些用例。
+- 不在 XCTest 中读取 `project.pbxproj`、搜索 `import AppUpdateKit`、扫描旧类型名或源码字符串；装配与旧实现残留由 `app-update-check-lint` 负责。
+- 使用公开 API 和 fake client 验证宿主接缝，不访问真实 App Store。若两个 App 开始复制同一组 helper 或预期，先把缺失行为连同测试移回 Kit。
