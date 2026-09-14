@@ -23,8 +23,13 @@ Explicitly out of scope:
   the device locale with an automatic US fallback. A host constructs
   `AppUpdateKit.AppUpdateController()` and calls one method.
 - **House policy inside the kit.** Recheck throttle (1 hour), "Later"
-  interval (24 hours), and "Skip This Version" semantics are portfolio-wide
-  decisions made here, not per-app tweaks.
+  interval (24 hours), the 7-day snooze, and "Skip This Version" semantics
+  are portfolio-wide decisions made here, not per-app tweaks.
+- **Every exit is recorded.** Swiping the sheet away counts as "Later", so a
+  dismissal always costs the user a postponement. Without it nothing is
+  persisted, the in-memory recheck clock resets on the next cold launch, and
+  the prompt returns immediately — what users report as "it asks every single
+  time I open the app" (MONO #804).
 - **Legacy-key compatible.** Persistence uses the exact UserDefaults keys the
   pre-kit implementations shipped (`IgnoredAppVersion`,
   `NextUpdateRemindDate`), so migrating an app preserves every user's
@@ -67,12 +72,20 @@ if let update = AppUpdate.controller.availableUpdate {
 ```
 
 `AppUpdateSheetView` is the house announcement prompt: app icon, “New
-Version”, Update Now / Remind Me Later, and the store release notes with
-line breaks preserved. It is localized (en source + de, es, fr, ja, ko,
-pt-BR, zh-Hans, zh-Hant). `ignoreThisVersion()` stays on the controller
-for hosts that want a skip action; the default sheet does not show it.
-Hosts with a bespoke design can render `availableUpdate` themselves and
-call `remindLater()` / `ignoreThisVersion()` directly.
+Version”, Update Now / Remind Me Later / Don't Remind Me for 7 Days, and the
+store release notes with line breaks preserved. It owns its own detent and
+drag indicator — hosts must not restate them. It is localized (en source +
+de, es, fr, ja, ko, pt-BR, zh-Hans, zh-Hant).
+
+The 7-day snooze is the only longer quiet period offered, and deliberately the
+only one: there is no 30-day option and no permanent opt-out, because the
+prompt exists to get people onto the current build.
+`ignoreThisVersion()` stays on the controller for hosts that want a skip
+action; the default sheet does not show it. Hosts with a bespoke design can
+render `availableUpdate` themselves and call `remindLater()` /
+`snoozeForOneWeek()` / `ignoreThisVersion()` directly — and must call
+`recordDismissalIfUnresolved()` when their sheet goes away, so a swipe still
+records a postponement.
 
 A settings-page "Check for Updates" action uses `force: true`, which bypasses
 both the throttle and the skip/remind suppression. The returned

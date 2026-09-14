@@ -306,6 +306,87 @@ struct AppUpdateControllerTests {
         #expect(afterInterval.availableUpdate?.latestVersion == "1.1.0")
     }
 
+    // MARK: - Seven-day snooze and dismissal accounting (MONO #804)
+
+    @Test func snoozeKeepsThePromptQuietForSevenDays() async {
+        let defaults = makeIsolatedDefaults()
+        let start = Date()
+        let client = MockLookupClient(release: makeRelease(version: "1.1.0"))
+
+        let controller = makeController(
+            client: client, defaults: defaults, now: { start })
+        await controller.checkForAppUpdate()
+        controller.snoozeForOneWeek()
+        #expect(controller.availableUpdate == nil)
+
+        let day6 = makeController(
+            client: client, defaults: defaults,
+            now: { start.addingTimeInterval(6 * 24 * 3600) })
+        await day6.checkForAppUpdate()
+        #expect(day6.availableUpdate == nil)
+
+        let day8 = makeController(
+            client: client, defaults: defaults,
+            now: { start.addingTimeInterval(8 * 24 * 3600) })
+        await day8.checkForAppUpdate()
+        #expect(day8.availableUpdate?.latestVersion == "1.1.0")
+    }
+
+    /// Regression for MONO #804: a user reported the prompt on every single
+    /// cold launch. Dismissing by swipe recorded nothing, and the recheck
+    /// throttle lives in memory, so the next launch prompted again. Any way
+    /// out of the sheet must now cost the user a postponement.
+    @Test func dismissingWithoutChoosingStillPostponesTheNextPrompt() async {
+        let defaults = makeIsolatedDefaults()
+        let start = Date()
+        let client = MockLookupClient(release: makeRelease(version: "1.1.0"))
+
+        let firstLaunch = makeController(
+            client: client, defaults: defaults, now: { start })
+        await firstLaunch.checkForAppUpdate()
+        #expect(firstLaunch.availableUpdate != nil)
+        firstLaunch.recordDismissalIfUnresolved()
+        #expect(firstLaunch.availableUpdate == nil)
+
+        let nextLaunch = makeController(
+            client: client, defaults: defaults,
+            now: { start.addingTimeInterval(60) })
+        await nextLaunch.checkForAppUpdate()
+        #expect(nextLaunch.availableUpdate == nil)
+    }
+
+    /// The sheet's `onDisappear` fires after the snooze button already cleared
+    /// the prompt. It must not overwrite the week with the dismissal's 24h.
+    @Test func dismissalAfterSnoozingDoesNotShortenTheQuietPeriod() async {
+        let defaults = makeIsolatedDefaults()
+        let start = Date()
+        let client = MockLookupClient(release: makeRelease(version: "1.1.0"))
+
+        let controller = makeController(
+            client: client, defaults: defaults, now: { start })
+        await controller.checkForAppUpdate()
+        controller.snoozeForOneWeek()
+        controller.recordDismissalIfUnresolved()
+
+        let day3 = makeController(
+            client: client, defaults: defaults,
+            now: { start.addingTimeInterval(3 * 24 * 3600) })
+        await day3.checkForAppUpdate()
+        #expect(day3.availableUpdate == nil)
+    }
+
+    @Test func snoozePersistsUnderTheLegacyRemindDateKey() async {
+        let defaults = makeIsolatedDefaults()
+        let client = MockLookupClient(release: makeRelease(version: "1.1.0"))
+        let controller = makeController(client: client, defaults: defaults)
+
+        await controller.checkForAppUpdate()
+        controller.snoozeForOneWeek()
+
+        #expect(defaults.object(forKey: "NextUpdateRemindDate") is Date)
+        #expect(defaults.string(forKey: "IgnoredAppVersion") == nil)
+    }
+
     // MARK: - Deadline
 
     @Test func hungLookupCompletesWithinTheKitDeadline() async {
