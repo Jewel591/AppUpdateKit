@@ -72,6 +72,9 @@ public struct AppUpdateSheetView: View {
     }
 }
 
+/// The 24h exit, and the only one the sheet spells out with a control: closing
+/// is what "remind me later" always meant, so it does that rather than leaving
+/// without a record. A separate "Remind Me Later" button would only restate it.
 private struct AppUpdateSheetCloseBar: View {
     let controller: AppUpdateController
 
@@ -181,16 +184,13 @@ private struct AppUpdateSheetActions: View {
             .appUpdateGlassProminentButtonStyle()
             .controlSize(.large)
 
-            Button {
-                controller.remindLater()
-                dismiss()
-            } label: {
-                Text("Remind Me Later", bundle: .module)
-                    .frame(maxWidth: .infinity)
-            }
-            .appUpdateGlassButtonStyle()
-            .controlSize(.large)
-
+            // There is deliberately no "Remind Me Later" button here: the
+            // close control already is one, with the same 24h effect, and a
+            // large secondary button repeating it sat next to the primary
+            // action competing for the same attention. Three exits with two
+            // outcomes read as a choice the user has to parse; the exits now
+            // differ — close/swipe for 24h, the line below for a week.
+            //
             // The quiet exit, at the lowest emphasis the stack allows: it is
             // the only longer postponement offered, and it should not compete
             // with updating. There is no permanent "skip this version" here

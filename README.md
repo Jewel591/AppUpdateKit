@@ -72,9 +72,13 @@ if let update = AppUpdate.controller.availableUpdate {
 ```
 
 `AppUpdateSheetView` is the house announcement prompt: app icon, “New
-Version”, Update Now / Remind Me Later / Don't Remind Me for 7 Days, and the
-store release notes with line breaks preserved. It owns its own detent and
-drag indicator — hosts must not restate them. It is localized (en source +
+Version”, Update Now, Don't Remind Me for 7 Days, and the store release notes
+with line breaks preserved. It owns its own detent and drag indicator — hosts
+must not restate them.
+
+Every exit leads somewhere different: the close control and a swipe postpone
+24 hours, the bottom line postpones a week. There is no separate "Remind Me
+Later" button, because closing already is one. It is localized (en source +
 de, es, fr, ja, ko, pt-BR, zh-Hans, zh-Hant).
 
 The 7-day snooze is the only longer quiet period offered, and deliberately the
