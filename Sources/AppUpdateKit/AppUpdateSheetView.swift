@@ -51,8 +51,13 @@ public struct AppUpdateSheetView: View {
                 .padding(.bottom)
         }
         .background(.background)
+        // Any way out records a postponement, the swipe included. The sheet is
+        // deliberately still swipe-dismissable — trapping the user behind a
+        // modal to win a tap is the worse trade — but a dismissal that records
+        // nothing is why the prompt used to come back on the very next launch.
+        .onDisappear { controller.recordDismissalIfUnresolved() }
         #if os(iOS)
-        .presentationDetents([.height(520)])
+        .presentationDetents([.height(580)])
         .presentationDragIndicator(.hidden)
         #endif
     }
@@ -185,6 +190,24 @@ private struct AppUpdateSheetActions: View {
             }
             .appUpdateGlassButtonStyle()
             .controlSize(.large)
+
+            // The quiet exit, at the lowest emphasis the stack allows: it is
+            // the only longer postponement offered, and it should not compete
+            // with updating. There is no permanent "skip this version" here
+            // on purpose — the prompt exists to get people onto the current
+            // build, so every exit eventually comes back.
+            Button {
+                controller.snoozeForOneWeek()
+                dismiss()
+            } label: {
+                Text("Don't Remind Me for 7 Days", bundle: .module)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
         }
     }
 }

@@ -8,8 +8,10 @@
    版本读 bundle、storefront 读设备 locale + US fallback。⛔ 不给宿主加配置参数——
    每多一个参数就是每个项目多一个写错的机会（历史上 MONO 的 AppUpdateViewModel
    注释里留着 Filmo 的 bundle id、appStoreId 硬编码过错值）。
-2. **策略常量写死在 kit 内**（1h 节流 / 24h 稍后提醒 / 跳过版本永久）。这是组合级
-   裁决，⛔ 不接受逐 App 调阈值的 PR；要改就全线一起改。
+2. **策略常量写死在 kit 内**（1h 节流 / 24h 稍后提醒 / 7 天安静期 / 跳过版本永久）。
+   这是组合级裁决，⛔ 不接受逐 App 调阈值的 PR；要改就全线一起改。
+   7 天是有意提供的唯一一档更长安静期，⛔ 不加 30 天、「不再提醒」或任何永久退出：
+   提醒的目的是把用户带到最新版本，每一条退路最终都要回来。
 3. **UserDefaults key 是迁移契约**：`IgnoredAppVersion`、`NextUpdateRemindDate`
    是 MONO / CodeCat / Filmo 上线版本已写入用户设备的 key，⛔ 永不改名。
    契约测试：`persistenceUsesTheLegacyKeyNames`。
@@ -23,6 +25,10 @@
    SheetCoordinator / SurfaceCoordinatorKit 决定何时展示。
 7. **强制更新 / 最低版本闸门有意不做**（本产品线无此需求；要做也是独立能力，
    不挂在提醒式更新检查上）。
+8. **任何退出都要记账**（MONO #804）。弹窗仍然可以下滑关闭——为了多一次点击把用户
+   困在模态里是更差的交易——但下滑必须与「稍后提醒」记同一笔。⛔ 不接受「关闭不写
+   任何状态」的路径：节流时钟在内存里，冷启动就会重置，不记账等于下次启动照弹。
+   契约测试：`dismissingWithoutChoosingStillPostponesTheNextPrompt`。
 
 ## CI 契约
 

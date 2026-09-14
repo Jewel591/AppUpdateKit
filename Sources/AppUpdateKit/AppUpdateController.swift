@@ -67,8 +67,9 @@ public enum AppUpdateCheckOutcome: Equatable, Sendable {
 @Observable
 public final class AppUpdateController {
     /// Non-nil exactly when a newer version exists and the house reminder
-    /// policy allows prompting. The host presents this and calls one of
-    /// `remindLater()` / `ignoreThisVersion()` / `openAppStore()`.
+    /// policy allows prompting. The host presents this; the standard sheet
+    /// calls `remindLater()` / `snoozeForOneWeek()` / `recordDismissalIfUnresolved()`
+    /// on the way out.
     public private(set) var availableUpdate: AppUpdatePresentation?
 
     /// True once this launch's check has reached a conclusion (found an
@@ -167,6 +168,27 @@ public final class AppUpdateController {
     public func remindLater() {
         UpdateReminderPolicy.recordRemindLater(defaults: defaults, now: now())
         availableUpdate = nil
+    }
+
+    /// Dismisses the prompt and keeps it quiet for a week — the one longer
+    /// quiet period the house offers.
+    public func snoozeForOneWeek() {
+        UpdateReminderPolicy.recordSnooze(defaults: defaults, now: now())
+        availableUpdate = nil
+    }
+
+    /// Records a postponement for a prompt that went away without the user
+    /// picking one of the buttons: a swipe-down dismissal, or the host tearing
+    /// its sheet down. Idempotent — the buttons clear `availableUpdate` first,
+    /// so a dismissal that follows one of them records nothing extra.
+    ///
+    /// Without this, dismissing by swipe costs nothing: no date is persisted,
+    /// the next cold launch starts with a fresh in-memory recheck clock, and
+    /// the prompt is back. That is what users report as "it asks every single
+    /// time I open the app".
+    public func recordDismissalIfUnresolved() {
+        guard availableUpdate != nil else { return }
+        remindLater()
     }
 
     /// Dismisses the prompt permanently for the offered version.

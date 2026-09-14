@@ -39,6 +39,12 @@ description: 在任何 Apple App 里实现、迁移或排查「检查 App Store 
 5. 设置页「检查更新」按钮用 `checkForAppUpdate(force: true)`（绕过节流与抑制）。
 6. 零配置是不变式：⛔ 不给 kit 加 App Store ID / storefront / 阈值参数；
    要改策略就在 kit 内全线一起改（见 kit CLAUDE.md 不变式 1–2）。
+7. `AppUpdateSheetView` 自带 detent、拖拽指示器与「任何退出都记一笔稍后提醒」的
+   `onDisappear`。宿主只负责 `.sheet` 的呈现时机，⛔ 不要在宿主侧重复
+   `presentationDetents` / `presentationDragIndicator`——重复声明会在 kit 调整
+   弹窗高度（如新增按钮）时把旧高度钉死，表现为按钮被裁掉。自绘 UI 的宿主必须
+   自己在关闭时调 `recordDismissalIfUnresolved()`，否则下滑关闭不记账，冷启动照弹
+   （MONO #804）。
 
 ## 宿主测试边界
 

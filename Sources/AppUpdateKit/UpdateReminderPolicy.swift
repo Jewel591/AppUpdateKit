@@ -13,6 +13,14 @@ enum UpdateReminderPolicy {
     static let recheckInterval: TimeInterval = 3600
     /// "Later" resurfaces the prompt on the first check after this interval.
     static let remindLaterInterval: TimeInterval = 24 * 3600
+    /// The one longer quiet period offered, and deliberately the only one.
+    /// A user who has seen the prompt and wants it gone needs an exit that
+    /// costs one tap; without it they dismiss by swiping, which records
+    /// nothing and brings the prompt back on the very next cold launch.
+    /// Nothing longer is offered and there is no permanent "skip this
+    /// version" button: the point of the prompt is to get people onto the
+    /// current build.
+    static let snoozeInterval: TimeInterval = 7 * 24 * 3600
 
     static let ignoredVersionKey = "IgnoredAppVersion"
     static let nextRemindDateKey = "NextUpdateRemindDate"
@@ -38,7 +46,18 @@ enum UpdateReminderPolicy {
     }
 
     static func recordRemindLater(defaults: UserDefaults, now: Date) {
-        defaults.set(now.addingTimeInterval(remindLaterInterval), forKey: nextRemindDateKey)
+        postpone(by: remindLaterInterval, defaults: defaults, now: now)
+    }
+
+    static func recordSnooze(defaults: UserDefaults, now: Date) {
+        postpone(by: snoozeInterval, defaults: defaults, now: now)
+    }
+
+    /// Both postponements write the same key, so the most recent choice always
+    /// wins outright — a user who snoozed a week and later taps "Later" on a
+    /// newer version gets 24h, not the leftover week.
+    private static func postpone(by interval: TimeInterval, defaults: UserDefaults, now: Date) {
+        defaults.set(now.addingTimeInterval(interval), forKey: nextRemindDateKey)
         // The user's latest choice wins: choosing "Later" on a version they
         // previously skipped (reachable via a forced check) means they want
         // to be reminded again — a lingering skip record would suppress that
