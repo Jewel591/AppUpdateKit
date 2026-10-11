@@ -1,6 +1,6 @@
 ---
 name: integrate-appupdatekit
-description: 在任何 Apple App 里实现、迁移或排查「检查 App Store 新版本 / 更新提醒弹窗」能力时必须先加载：一律接 AppUpdateKit（Jewel591/AppUpdateKit），⛔ 不再手写 AppUpdateViewModel / iTunes Lookup 调用 / 版本比较。覆盖标准接入姿势、CI lint（app-update-check-lint v6）的四项装配证据、迁移时的删除清单与 UserDefaults key 兼容事实。本 skill 是接入索引，范围裁决正文在本仓库 CLAUDE.md。
+description: 在任何 Apple App 里实现、迁移或排查「检查 App Store 新版本 / 更新提醒弹窗」能力时必须先加载：一律接 AppUpdateKit（Jewel591/AppUpdateKit），⛔ 不再手写 AppUpdateViewModel / iTunes Lookup 调用 / 版本比较。覆盖标准接入姿势、CI lint（app-update-check-lint v6）的四项装配证据、迁移时的删除清单与 UserDefaults key 兼容事实。本 skill 是接入索引，范围裁决正文在本仓库 AGENTS.md。
 ---
 
 # AppUpdateKit 接入 skill
@@ -9,7 +9,7 @@ description: 在任何 Apple App 里实现、迁移或排查「检查 App Store 
 
 全线 Apple App 的更新检查唯一正身是 **[Jewel591/AppUpdateKit](https://github.com/Jewel591/AppUpdateKit)**
 （本地 checkout：`~/Documents/DevProjects/Swift Projects/AppUpdateKit`）。
-范围裁决与不变式读 kit 仓库 `CLAUDE.md`，用法读 `README.md`——本文件不复制正文。
+范围裁决与不变式读 kit 仓库 `AGENTS.md`，用法读 `README.md`——本文件不复制正文。
 
 ## 何时触发
 
@@ -38,7 +38,7 @@ description: 在任何 Apple App 里实现、迁移或排查「检查 App Store 
    What's New 后再收一轮。
 5. 设置页「检查更新」按钮用 `checkForAppUpdate(force: true)`（绕过节流与抑制）。
 6. 零配置是不变式：⛔ 不给 kit 加 App Store ID / storefront / 阈值参数；
-   要改策略就在 kit 内全线一起改（见 kit CLAUDE.md 不变式 1–2）。
+   要改策略就在 kit 内全线一起改（见 kit AGENTS.md 不变式 1–2）。
 7. `AppUpdateSheetView` 自带 detent、拖拽指示器与「任何退出都记一笔稍后提醒」的
    `onDisappear`。宿主只负责 `.sheet` 的呈现时机，⛔ 不要在宿主侧重复
    `presentationDetents` / `presentationDragIndicator`——重复声明会在 kit 调整
