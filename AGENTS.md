@@ -1,4 +1,4 @@
-# CLAUDE.md — AppUpdateKit
+# AGENTS.md — AppUpdateKit
 
 本仓库是全线 Apple App 的更新检查正身。范围裁决与不变式记录在此；README 是使用文档。
 
